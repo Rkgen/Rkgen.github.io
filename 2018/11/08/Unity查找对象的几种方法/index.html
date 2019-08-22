@@ -7,18 +7,18 @@
   
   <title>Unity查找对象的几种方法 | Rkg&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法">
+  <meta name="description" content="前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法 首先要了解两个类  GameObject TransformGameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化  12Transform t = gameobject.transform;GameObject go = t.gameobject;  而它们的区别在于">
 <meta name="keywords" content="Unity3D">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Unity查找对象的几种方法">
-<meta property="og:url" content="http://yoursite.com/2019/08/20/Unity查找对象的几种方法/index.html">
+<meta property="og:url" content="http://yoursite.com/2018/11/08/Unity查找对象的几种方法/index.html">
 <meta property="og:site_name" content="Rkg&#39;s blog">
-<meta property="og:description" content="前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法">
+<meta property="og:description" content="前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法 首先要了解两个类  GameObject TransformGameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化  12Transform t = gameobject.transform;GameObject go = t.gameobject;  而它们的区别在于">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-20T10:40:30.815Z">
+<meta property="og:updated_time" content="2019-08-22T02:51:35.680Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Unity查找对象的几种方法">
-<meta name="twitter:description" content="前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法">
+<meta name="twitter:description" content="前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法 首先要了解两个类  GameObject TransformGameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化  12Transform t = gameobject.transform;GameObject go = t.gameobject;  而它们的区别在于">
   
     <link rel="alternate" href="/atom.xml" title="Rkg&#39;s blog" type="application/atom+xml">
   
@@ -26,7 +26,7 @@
     <link rel="icon" href="https://rkgen.github.io/images/favicon.png">
   
   
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+    <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
   
   <link rel="stylesheet" href="/css/style.css">
 
@@ -68,8 +68,8 @@
       <div class="outer">
         <section id="main"><article id="post-Unity查找对象的几种方法" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2019/08/20/Unity查找对象的几种方法/" class="article-date">
-  <time datetime="2019-08-20T10:32:23.000Z" itemprop="datePublished">2019-08-20</time>
+    <a href="/2018/11/08/Unity查找对象的几种方法/" class="article-date">
+  <time datetime="2018-11-08T10:32:23.000Z" itemprop="datePublished">2018-11-08</time>
 </a>
     
   <div class="article-category">
@@ -93,11 +93,30 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法</p>
+<p>首先要了解两个类</p>
+<ul>
+<li><code>GameObject</code></li>
+<li><code>Transform</code><br>GameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化</li>
+</ul>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Transform t = gameobject.transform;</span><br><span class="line">GameObject go = t.gameobject;</span><br></pre></td></tr></table></figure>
+
+<p>而它们的区别在于：<code>GameObject</code>更倾向于游戏体本身的属性，如物体激活状态，物体的名称，物体的标签，物体的渲染层等设置，而<code>Transform</code>更多是表述模型的<strong>层级关系</strong>也就是父子关系，和本身的位置旋转缩放等信息，所以当需要查找嵌套的物体时，优先使用<code>Transform</code>来查找模型，<code>GameObject</code>更适合在不关心物体层级关系的情况下查找,且通常是使用GameObject的静态方法查找，Transform则更多调用实例方法。</p>
+<h4 id="通过GameObject获取"><a href="#通过GameObject获取" class="headerlink" title="通过GameObject获取"></a>通过GameObject获取</h4><ol>
+<li>已经知道物体的名称，并且它是唯一的<br><code>GameObject.Find(&quot;对象名&quot;)</code></li>
+<li>已经知道物体的标签，并且是唯一的<br><code>GameObject.FindWithTag(&quot;标签名&quot;)</code></li>
+<li>已经知道物体的标签，且有多个，返回一个GameObject数组<br><code>GameObject.FindGameObjectsWithTag(&quot;标签名&quot;)</code></li>
+</ol>
+<p><em>以上方法只能查找激活状态的物体</em></p>
+<h4 id="通过Transform获取"><a href="#通过Transform获取" class="headerlink" title="通过Transform获取"></a>通过Transform获取</h4><ol>
+<li>需要获取当前物体下的某个子物体（脚本挂载当前物体上）<br><code>transform.Find(&quot;直接子物体的名称 or 子物体路径&quot;)</code><br>如果需要查找的物体就在当前物体下，可以直接使用物体名称，如果需要查找物体在更深的位置（当前是a物体，其下有b物体，b下有c物体），需要通过路径：”b\c”来找到c物体。</li>
+<li>查找所有包含组件Button的物体<br><code>Transform.FindObjectsOfType&lt;Button&gt;()</code></li>
+</ol>
+<p><em>Transform查找物体的好处是，它能找到被禁用（未激活）的物体</em></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/08/20/Unity查找对象的几种方法/" data-id="cjzkxb6sd0004d8u1l6bsx3tt" class="article-share-link">分享</a>
+      <a data-url="http://yoursite.com/2018/11/08/Unity查找对象的几种方法/" data-id="cjzm3dqg90000rsu1emokqjda" class="article-share-link">分享</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
@@ -108,10 +127,19 @@
     
 <nav id="article-nav">
   
+    <a href="/2019/06/20/UGUI实现窗口切换动画/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          UGUI实现窗口切换动画
+        
+      </div>
+    </a>
   
-    <a href="/2019/08/20/UGUI实现窗口切换动画/" id="article-nav-older" class="article-nav-link-wrap">
+  
+    <a href="/2018/01/01/MarkDown教程/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">UGUI实现窗口切换动画</div>
+      <div class="article-nav-title">MarkDown教程</div>
     </a>
   
 </nav>
@@ -156,7 +184,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a></li></ul>
     </div>
   </div>
 
@@ -169,15 +197,15 @@
       <ul>
         
           <li>
-            <a href="/2019/08/20/Unity查找对象的几种方法/">Unity查找对象的几种方法</a>
+            <a href="/2019/06/20/UGUI实现窗口切换动画/">UGUI实现窗口切换动画</a>
           </li>
         
           <li>
-            <a href="/2019/08/20/UGUI实现窗口切换动画/">UGUI实现窗口切换动画</a>
+            <a href="/2018/11/08/Unity查找对象的几种方法/">Unity查找对象的几种方法</a>
           </li>
         
           <li>
-            <a href="/2019/08/10/MarkDown教程/">MarkDown教程</a>
+            <a href="/2018/01/01/MarkDown教程/">MarkDown教程</a>
           </li>
         
       </ul>

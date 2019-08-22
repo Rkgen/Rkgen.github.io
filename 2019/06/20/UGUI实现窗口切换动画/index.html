@@ -11,20 +11,20 @@
 <meta name="keywords" content="Unity3D,UGUI,Animation">
 <meta property="og:type" content="article">
 <meta property="og:title" content="UGUI实现窗口切换动画">
-<meta property="og:url" content="http://yoursite.com/2019/08/20/UGUI实现窗口切换动画/index.html">
+<meta property="og:url" content="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/index.html">
 <meta property="og:site_name" content="Rkg&#39;s blog">
 <meta property="og:description" content="前言在开发的过程中我们常常需要创建很多UI窗口，如何让这些窗口按照递归的方式而且还是带动画地进行切换呢，本文介绍了一种方法实现这个功能  思路为了实现这样的效果，需要搭建一个UI框架，原理就是让Animator组件控制红框UI容器移动   在红框容器中再放置两个空物体作为子容器，分别是A和B，A是当前的页面，B是要打开的窗口，而B子容器部分还可再嵌套一个容器，这样移动红框容器，就可以将B部分显示出">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/2019/08/20/UGUI实现窗口切换动画/effect.gif">
-<meta property="og:image" content="http://yoursite.com/2019/08/20/UGUI实现窗口切换动画/frame.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/08/20/UGUI实现窗口切换动画/frame2.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/08/20/UGUI实现窗口切换动画/frame3.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/08/20/UGUI实现窗口切换动画/pic1.jpg">
-<meta property="og:updated_time" content="2019-08-20T10:18:45.791Z">
+<meta property="og:image" content="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/effect.gif">
+<meta property="og:image" content="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/frame.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/frame2.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/frame3.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/pic1.jpg">
+<meta property="og:updated_time" content="2019-08-22T02:52:33.663Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="UGUI实现窗口切换动画">
 <meta name="twitter:description" content="前言在开发的过程中我们常常需要创建很多UI窗口，如何让这些窗口按照递归的方式而且还是带动画地进行切换呢，本文介绍了一种方法实现这个功能  思路为了实现这样的效果，需要搭建一个UI框架，原理就是让Animator组件控制红框UI容器移动   在红框容器中再放置两个空物体作为子容器，分别是A和B，A是当前的页面，B是要打开的窗口，而B子容器部分还可再嵌套一个容器，这样移动红框容器，就可以将B部分显示出">
-<meta name="twitter:image" content="http://yoursite.com/2019/08/20/UGUI实现窗口切换动画/effect.gif">
+<meta name="twitter:image" content="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/effect.gif">
   
     <link rel="alternate" href="/atom.xml" title="Rkg&#39;s blog" type="application/atom+xml">
   
@@ -32,7 +32,7 @@
     <link rel="icon" href="https://rkgen.github.io/images/favicon.png">
   
   
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+    <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
   
   <link rel="stylesheet" href="/css/style.css">
 
@@ -74,8 +74,8 @@
       <div class="outer">
         <section id="main"><article id="post-UGUI实现窗口切换动画" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2019/08/20/UGUI实现窗口切换动画/" class="article-date">
-  <time datetime="2019-08-20T07:37:38.000Z" itemprop="datePublished">2019-08-20</time>
+    <a href="/2019/06/20/UGUI实现窗口切换动画/" class="article-date">
+  <time datetime="2019-06-20T07:37:38.000Z" itemprop="datePublished">2019-06-20</time>
 </a>
     
   <div class="article-category">
@@ -99,12 +99,12 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在开发的过程中我们常常需要创建很多UI窗口，如何让这些窗口按照递归的方式而且还是带动画地进行切换呢，本文介绍了一种方法实现这个功能</p>
-<img src="/2019/08/20/UGUI实现窗口切换动画/effect.gif" title="effect">
+<img src="/2019/06/20/UGUI实现窗口切换动画/effect.gif" title="effect">
 <h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>为了实现这样的效果，需要搭建一个UI框架，原理就是让Animator组件控制红框UI容器移动</p>
-<img src="/2019/08/20/UGUI实现窗口切换动画/frame.jpg">
+<img src="/2019/06/20/UGUI实现窗口切换动画/frame.jpg">
 
 <p>在红框容器中再放置两个空物体作为子容器，分别是A和B，A是当前的页面，B是要打开的窗口，而B子容器部分还可再嵌套一个容器，这样移动红框容器，就可以将B部分显示出来</p>
-<img src="/2019/08/20/UGUI实现窗口切换动画/frame2.jpg">
+<img src="/2019/06/20/UGUI实现窗口切换动画/frame2.jpg">
 
 <p>这时如果B部分也是一个容器，那么再移动B部分就能将C显示出来，以此类推</p>
 <h2 id="功能实现"><a href="#功能实现" class="headerlink" title="功能实现"></a>功能实现</h2><p>首先要实现的就是创建控制父容器的两个动画，移动和恢复，向左移动以显示出B子容器，向右恢复来显示A子容器，使用<code>Ctrl</code>+<code>6</code> 打开动画设置面板，选中红框容器，为其创建一个动画，创建动画的过程在这里就不赘述了，只是简单的移动Anchored Position位置，然后在Animator中为其添加展开和关闭动画，并设置is_Open bool用于值切换动画，一切准备好后，就可以为红框父容器添加一个脚本:<code>Container</code> 代码如下</p>
@@ -115,17 +115,17 @@
 
 <p>将这个脚本赋予给红框容器，然后添加打开下一个页面的按钮和下一个窗口的Transform，默认情况下要打开窗口的GameObject是禁用隐藏的，然后先将它放入当前容器的B子容器中（预备打开），将其位置归零，然后激活这个GameObj，把当前窗口的Container组件传递给新窗口（用于在新窗口关闭时调用），一切都准备就绪后，使用<code>SwitchWindow(true)</code>让当前红框容器动画切换到B子容器，这时控制权为B容器中的内容，是调用<code>Back()</code>方法返回上一个页面，还是再进入新的页面都可以。</p>
 <p>结构图</p>
-<img src="/2019/08/20/UGUI实现窗口切换动画/frame3.jpg">
+<img src="/2019/06/20/UGUI实现窗口切换动画/frame3.jpg">
 
 <p>最后<code>Ctrl</code>+<code>D</code>复制几个容器，主容器上添加OpenWindow脚本，把复制出来的容器拖入即可</p>
-<img src="/2019/08/20/UGUI实现窗口切换动画/pic1.jpg">
+<img src="/2019/06/20/UGUI实现窗口切换动画/pic1.jpg">
 
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>实现这个技术主要用到了嵌套的模式结合动画来实现这个效果，有点类似于数据结构中的链栈结构，可以不断的打开新的窗口，但回退时必须要原路返回</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/08/20/UGUI实现窗口切换动画/" data-id="cjzkxb6s90001d8u110nl9kke" class="article-share-link">分享</a>
+      <a data-url="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/" data-id="cjzm3dqgh0004rsu1egjt5cq2" class="article-share-link">分享</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Animation/">Animation</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/UGUI/">UGUI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
@@ -136,19 +136,10 @@
     
 <nav id="article-nav">
   
-    <a href="/2019/08/20/Unity查找对象的几种方法/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          Unity查找对象的几种方法
-        
-      </div>
-    </a>
   
-  
-    <a href="/2019/08/10/MarkDown教程/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2018/11/08/Unity查找对象的几种方法/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">MarkDown教程</div>
+      <div class="article-nav-title">Unity查找对象的几种方法</div>
     </a>
   
 </nav>
@@ -193,7 +184,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a></li></ul>
     </div>
   </div>
 
@@ -206,15 +197,15 @@
       <ul>
         
           <li>
-            <a href="/2019/08/20/Unity查找对象的几种方法/">Unity查找对象的几种方法</a>
+            <a href="/2019/06/20/UGUI实现窗口切换动画/">UGUI实现窗口切换动画</a>
           </li>
         
           <li>
-            <a href="/2019/08/20/UGUI实现窗口切换动画/">UGUI实现窗口切换动画</a>
+            <a href="/2018/11/08/Unity查找对象的几种方法/">Unity查找对象的几种方法</a>
           </li>
         
           <li>
-            <a href="/2019/08/10/MarkDown教程/">MarkDown教程</a>
+            <a href="/2018/01/01/MarkDown教程/">MarkDown教程</a>
           </li>
         
       </ul>
