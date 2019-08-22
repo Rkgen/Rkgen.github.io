@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[Vim快速上手]]></title>
+    <url>%2F2019%2F08%2F22%2FVim%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B%2F</url>
+    <content type="text"><![CDATA[前言Vim是Linux系统下一款非常好用的编辑器，用的好会非常顺手，而不会用会让你想把电脑砸了，下面就来介绍介绍它 首先要了解的是它有三种状态分别是： 命令模式：控制光标移动，对文本进行复制粘贴、删除和查找等工作 输入模式：正常的文本输入，类似于记事本 末行模式：保存或退出文档，以及设置编辑环境，增加行号显示灯操作 以下是三种模式状态的状态切换图 命令模式Vim在进入时自动进入命令模式，命令模式主要是对文本的一些编辑操作，其中内置的命令也有几百上前种用法，下面是一些常用命令，通常该模式用来复制粘贴文本内容 命令 作用 dd 删除（剪切）光标所在整行 5dd 删除（剪切）从光标处开始的5行 yy 复制光标所在行 5yy 复制光标所在处开始的5行 v 开始选择范围（选择后按y或d操作） V 开始选择行范围 n 显示搜索命令定位到的下一个字符串 N 显示搜索命令定位到的上一个字符串 u 撤销上一步操作 p 将剪切的内容粘贴到光标位置 h 左移光标 j 下移光标 k 上移光标 l 右移光标 多行缩进：按v选择要缩进的行，然后按‘&gt;’来缩进‘&lt;’来取消缩进]]></content>
+      <categories>
+        <category>Tech</category>
+        <category>Linux</category>
+        <category>Vim</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+        <tag>Bash</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[UGUI实现窗口切换动画]]></title>
     <url>%2F2019%2F06%2F20%2FUGUI%E5%AE%9E%E7%8E%B0%E7%AA%97%E5%8F%A3%E5%88%87%E6%8D%A2%E5%8A%A8%E7%94%BB%2F</url>
     <content type="text"><![CDATA[前言在开发的过程中我们常常需要创建很多UI窗口，如何让这些窗口按照递归的方式而且还是带动画地进行切换呢，本文介绍了一种方法实现这个功能 思路为了实现这样的效果，需要搭建一个UI框架，原理就是让Animator组件控制红框UI容器移动 在红框容器中再放置两个空物体作为子容器，分别是A和B，A是当前的页面，B是要打开的窗口，而B子容器部分还可再嵌套一个容器，这样移动红框容器，就可以将B部分显示出来 这时如果B部分也是一个容器，那么再移动B部分就能将C显示出来，以此类推 功能实现首先要实现的就是创建控制父容器的两个动画，移动和恢复，向左移动以显示出B子容器，向右恢复来显示A子容器，使用Ctrl+6 打开动画设置面板，选中红框容器，为其创建一个动画，创建动画的过程在这里就不赘述了，只是简单的移动Anchored Position位置，然后在Animator中为其添加展开和关闭动画，并设置is_Open bool用于值切换动画，一切准备好后，就可以为红框父容器添加一个脚本:Container 代码如下 12345678910111213141516171819202122232425262728293031323334/// &lt;summary&gt;/// 红框容器脚本/// &lt;/summary&gt;public class Container : MonoBehaviour&#123; Animator at; public Container before; //上一个容器 public Button btn_back; //返回上一个容器按钮（关闭当前窗口） public Transform A; //子容器A public Transform B; //子容器B private void Awake() &#123; at = GetComponent&lt;Animator&gt;(); // 获取动画组件 A = transform.Find("A"); //获取子容器 B = transform.Find("B"); if(btn_back!=null) btn_back.onClick.AddListener(Back);//按钮绑定事件 &#125; //设置当前是否播放动画，参数为true时，切换到B，false时切换回A public void SwitchWindow(bool b) &#123; at.SetBool("isOpen", b); &#125; //按下返回按钮 public void Back() &#123; before.SwitchWindow(false); //关闭当前窗口时，让父容器切换回A页面 //返回到上一个窗口时，将自身从父容器的B子容器中分离，因为父窗口不一定只会打开这个窗口，可能会有多个分支 transform.parent= null; gameObject.SetActive(false); //隐藏当前窗口 &#125;&#125; 这样，只需要调用SwitchWindow(bool b)方法，就能实现切换窗口，接下来要创建打开一个新窗口的脚本 123456789101112131415161718public class OpenWindow : MonoBehaviour&#123; Container Con; //当前容器 public Transform win; //下一个窗口 public Button btn; //打开按钮 private void Awake() &#123; Con = GetComponent&lt;Container&gt;(); //获取当前容器组件 btn.onClick.AddListener(() =&gt; &#123; win.parent = Con.B; //要显示的窗口设置为容器的B (win as RectTransform).anchoredPosition = Vector3.zero;//恢复0位置，相当于B容器 win.gameObject.SetActive(true); //激活显示要切换的窗口 win.GetComponent&lt;Container&gt;().before = Con; // 将当前容器传递给下一个容器 Con.SwitchWindow(true); //切换到B &#125;); &#125;&#125; 将这个脚本赋予给红框容器，然后添加打开下一个页面的按钮和下一个窗口的Transform，默认情况下要打开窗口的GameObject是禁用隐藏的，然后先将它放入当前容器的B子容器中（预备打开），将其位置归零，然后激活这个GameObj，把当前窗口的Container组件传递给新窗口（用于在新窗口关闭时调用），一切都准备就绪后，使用SwitchWindow(true)让当前红框容器动画切换到B子容器，这时控制权为B容器中的内容，是调用Back()方法返回上一个页面，还是再进入新的页面都可以。 结构图 最后Ctrl+D复制几个容器，主容器上添加OpenWindow脚本，把复制出来的容器拖入即可 总结实现这个技术主要用到了嵌套的模式结合动画来实现这个效果，有点类似于数据结构中的链栈结构，可以不断的打开新的窗口，但回退时必须要原路返回]]></content>
@@ -16,6 +30,18 @@
       </tags>
   </entry>
   <entry>
+    <title><![CDATA[UI自适应分辨率]]></title>
+    <url>%2F2018%2F11%2F22%2FUI%E8%87%AA%E9%80%82%E5%BA%94%E5%88%86%E8%BE%A8%E7%8E%87%2F</url>
+    <content type="text"><![CDATA[前言有时候我们排版好UI布局后，虽然相对位置可以随分辨率改变而改变，但图像的尺寸则是固定的，分辨率低时图形几乎占满画面，无法使用，那么就需要设置UI图形自适应缩放了 设置方法 修改Canvas对象的Canvas Scaler组件属性：UI Scale Mode改为Scale With Screen Size并设置参考分辨率这个Reference Resolution的意思是在这个分辨率下，UI元素显示的比例/尺寸是你想要的效果，或者你就是按照这个分辨率/比例调节的界面元素尺寸，Unity根据这个标准的分辨率来推算不同分辨率下UI元素的缩放程度，而程度是由Match属性决定的，值越小，调节的幅度越大。]]></content>
+      <categories>
+        <category>Tech</category>
+        <category>Unity3D</category>
+      </categories>
+      <tags>
+        <tag>Unity3D</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[Unity查找对象的几种方法]]></title>
     <url>%2F2018%2F11%2F08%2FUnity%E6%9F%A5%E6%89%BE%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95%2F</url>
     <content type="text"><![CDATA[前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法 首先要了解两个类 GameObject TransformGameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化 12Transform t = gameobject.transform;GameObject go = t.gameobject; 而它们的区别在于：GameObject更倾向于游戏体本身的属性，如物体激活状态，物体的名称，物体的标签，物体的渲染层等设置，而Transform更多是表述模型的层级关系也就是父子关系，和本身的位置旋转缩放等信息，所以当需要查找嵌套的物体时，优先使用Transform来查找模型，GameObject更适合在不关心物体层级关系的情况下查找,且通常是使用GameObject的静态方法查找，Transform则更多调用实例方法。 通过GameObject获取 已经知道物体的名称，并且它是唯一的GameObject.Find(&quot;对象名&quot;) 已经知道物体的标签，并且是唯一的GameObject.FindWithTag(&quot;标签名&quot;) 已经知道物体的标签，且有多个，返回一个GameObject数组GameObject.FindGameObjectsWithTag(&quot;标签名&quot;) 以上方法只能查找激活状态的物体 通过Transform获取 需要获取当前物体下的某个子物体（脚本挂载当前物体上）transform.Find(&quot;直接子物体的名称 or 子物体路径&quot;)如果需要查找的物体就在当前物体下，可以直接使用物体名称，如果需要查找物体在更深的位置（当前是a物体，其下有b物体，b下有c物体），需要通过路径：”b\c”来找到c物体。 查找所有包含组件Button的物体Transform.FindObjectsOfType&lt;Button&gt;() Transform查找物体的好处是，它能找到被禁用（未激活）的物体]]></content>
@@ -25,6 +51,30 @@
       </categories>
       <tags>
         <tag>Unity3D</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Unity中的单例基类]]></title>
+    <url>%2F2018%2F11%2F08%2FUnity%E4%B8%AD%E7%9A%84%E5%8D%95%E4%BE%8B%E5%9F%BA%E7%B1%BB%2F</url>
+    <content type="text"><![CDATA[前言在开发过程中，由于游戏项目功能模块繁多，很多独立的模块都有自己单独的唯一入口，基本上都是用单例实现的，就像 12345678910111213public class UIManager : MonoBehaviour&#123; private static UIManager _instance; public static UIManager Instance &#123; get &#123; if (_instance == null) _instance = new GameObject(typeof(UIManager).Name).AddComponent&lt;UIManager&gt;(); return _instance; &#125; &#125;&#125; 上面的UIManager就是一个单例类，当第一次访问UIManager.Instance的时候，我们就会在游戏内创建一个名叫“UIManager”的物体，它挂载了我们的单例脚本实例UIManager。现在有一个问题，假如我有100个单例类要创建，每个类都要复制这段代码很麻烦很不精炼，有没有更清爽的做法?当然有，我们把单例的实现封装到基类中去就能省去代码复制之苦，可是基类并不知道子类的具体类型，怎么返回子类型的Instance？如果Instance是以基类类型返回的，那么这个基类的存在意义就不大了。但是幸好C#有泛型，我们可以把子类的具体类型以泛型参数T的形式通知给基类，这样基类就能返回子类型。下面是代码： 123456789101112131415public class Singleton&lt;T&gt; : MonoBehaviour where T : Singleton&lt;T&gt;&#123; private static T _instance; public static T Instance &#123; get &#123; if (_instance == null) &#123; _instance = new GameObject(typeof(T).Name).AddComponent&lt;T&gt;(); &#125; return _instance; &#125; &#125;&#125; 这个基类最重要的代码就是where T : Singleton，它限定T必须是Singleton的子类，虽然它长的着实有点奇怪。这时我们再声明单例类UIManager的时候就可以一行代码搞定了： 123public class UIManager : Singleton&lt;UIManager&gt;&#123;&#125; 这里子类把自己的类型作为泛型参数通知给了基类，基类便知道Instance应该是什么类型了。使用的时候直接访问UIManager.Instance即可。这个Singleton我觉得有点复杂，同时创建了一个私有静态变量_instance和公有静态属性Instance，显得有点冗余，这里我们做个优化： 1234public class Singleton&lt;T&gt; : MonoBehaviour where T : Singleton&lt;T&gt;&#123; public static readonly T Instance = new GameObject(typeof(T).Name).AddComponent&lt;T&gt;();&#125;]]></content>
+      <categories>
+        <category>Tech</category>
+        <category>Unity3D</category>
+      </categories>
+      <tags>
+        <tag>Unity3D</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[OOP接口的理解]]></title>
+    <url>%2F2018%2F10%2F24%2Foop%E6%8E%A5%E5%8F%A3%E7%9A%84%E7%90%86%E8%A7%A3%2F</url>
+    <content type="text"><![CDATA[概括最终目标：以不变应万变。类与类之间用接口引用，而不是直接调用，接口派生类再怎么变化只要接口不改程序就不会出现问题。把多个类似的类的相同/主要操作提取出一个接口并实现，然后这些类抽取出相同因素构成父类，令接口使用泛型限制为父类的类型，既满足了多各类的相同方法实现，也满足相同方法中的不同类型的参数。 主要逻辑原则，基本业务可以抽象成任务接口，业务类继承它，在控制器层调用任务并实例化相应的业务类，可以直接简单的操作，即使以后业务内容变动，控制器层仍然不需要修改。 不同的层展示不同的方法，通过接口就可以区分层次，高层的类（控制器）无需知道低层类（业务）的其他方法，只要使用业务.执行()的方法，同样业务类也无需知道sql查询过程，只管提交数据给dao对象查询结果，如果通用dao接口能满足使用，就无需再向下转型。控制器 -（任务接口）- 业务 -（dao接口）- 数据访问实现类 接口是完全公开，公有的，目的就是让所有人都可以使用，但使用的人并不需要关心它内部是如何实现的，只需要使用接口固定的几个关键方法，只需知道怎么使用，不关心原理，这就是接口的意义。 例如一个USB接口，带有USB接口的设备成千上万，但都通过这一个接口连接电脑，对于电脑（调用方）来说，并不关心这个设备（被调用方）是怎么实现它的功能的，我只关心怎么和它通信，这就要通过接口来实现，如USB接口中定义了两个方法，send(),get() send方法用来向USB设备发送数据，而get方法用来接收数据，比如这是个u盘设备并实现了USB接口，那么电脑只需要调用uDisk.send(File)方法传入某文件/数据，这样就可以把文件写入u盘中，而电脑根本不用知道u盘内部是如何存储文件，如何管理文件的，又比如这个USB设备是一个鼠标，我们马上会想到使用Info i = mouse.get()通过get获取鼠标发回来的信息，并进行解析，看到这里，不难发现，不管是何种USB设备，它和电脑之间永远只有两种方法，就是发送和接收，这就是将两个对象间的调用关系简化到极致的产物，它已经不能再简单了，我们只要把这些关键方法写作一个接口，而它们之间交互的数据类型则成为USB接口的泛型，发送和接收方法的参数/返回值类型就可以是泛型的，这样就能使得他们之间的联系变得有条不紊。 这些设备知道自己该做什么，但都遵循这个USB接口规则*]]></content>
+      <categories>
+        <category>Tech</category>
+        <category>Coding</category>
+      </categories>
+      <tags>
+        <tag>OOP</tag>
       </tags>
   </entry>
   <entry>

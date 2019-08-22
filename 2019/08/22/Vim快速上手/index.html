@@ -5,15 +5,22 @@
   
 
   
-  <title>Category: UGUI | Rkg&#39;s blog</title>
+  <title>Vim快速上手 | Rkg&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Rkg&#39;s blog">
-<meta property="og:url" content="http://yoursite.com/categories/Tech/Unity3D/UGUI/index.html">
+  <meta name="description" content="前言Vim是Linux系统下一款非常好用的编辑器，用的好会非常顺手，而不会用会让你想把电脑砸了，下面就来介绍介绍它 首先要了解的是它有三种状态分别是：  命令模式：控制光标移动，对文本进行复制粘贴、删除和查找等工作 输入模式：正常的文本输入，类似于记事本 末行模式：保存或退出文档，以及设置编辑环境，增加行号显示灯操作  以下是三种模式状态的状态切换图   命令模式Vim在进入时自动进入命令模式，命">
+<meta name="keywords" content="Linux,Bash">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vim快速上手">
+<meta property="og:url" content="http://yoursite.com/2019/08/22/Vim快速上手/index.html">
 <meta property="og:site_name" content="Rkg&#39;s blog">
+<meta property="og:description" content="前言Vim是Linux系统下一款非常好用的编辑器，用的好会非常顺手，而不会用会让你想把电脑砸了，下面就来介绍介绍它 首先要了解的是它有三种状态分别是：  命令模式：控制光标移动，对文本进行复制粘贴、删除和查找等工作 输入模式：正常的文本输入，类似于记事本 末行模式：保存或退出文档，以及设置编辑环境，增加行号显示灯操作  以下是三种模式状态的状态切换图   命令模式Vim在进入时自动进入命令模式，命">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2019/08/22/Vim快速上手/pic1.jpg">
+<meta property="og:updated_time" content="2019-08-22T03:46:49.776Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Rkg&#39;s blog">
+<meta name="twitter:title" content="Vim快速上手">
+<meta name="twitter:description" content="前言Vim是Linux系统下一款非常好用的编辑器，用的好会非常顺手，而不会用会让你想把电脑砸了，下面就来介绍介绍它 首先要了解的是它有三种状态分别是：  命令模式：控制光标移动，对文本进行复制粘贴、删除和查找等工作 输入模式：正常的文本输入，类似于记事本 末行模式：保存或退出文档，以及设置编辑环境，增加行号显示灯操作  以下是三种模式状态的状态切换图   命令模式Vim在进入时自动进入命令模式，命">
+<meta name="twitter:image" content="http://yoursite.com/2019/08/22/Vim快速上手/pic1.jpg">
   
     <link rel="alternate" href="/atom.xml" title="Rkg&#39;s blog" type="application/atom+xml">
   
@@ -61,40 +68,133 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2019/06/20/UGUI实现窗口切换动画/" class="archive-article-date">
-  <time datetime="2019-06-20T07:37:38.000Z" itemprop="datePublished">6月 20</time>
+        <section id="main"><article id="post-Vim快速上手" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/08/22/Vim快速上手/" class="article-date">
+  <time datetime="2019-08-22T03:38:05.000Z" itemprop="datePublished">2019-08-22</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Linux/">Linux</a>►<a class="article-category-link" href="/categories/Tech/Linux/Vim/">Vim</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/06/20/UGUI实现窗口切换动画/">UGUI实现窗口切换动画</a>
+    <h1 class="article-title" itemprop="name">
+      Vim快速上手
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Vim是Linux系统下一款非常好用的编辑器，用的好会非常顺手，而不会用会让你想把电脑砸了，下面就来介绍介绍它</p>
+<p>首先要了解的是它有三种状态分别是：</p>
+<ul>
+<li>命令模式：控制光标移动，对文本进行复制粘贴、删除和查找等工作</li>
+<li>输入模式：正常的文本输入，类似于记事本</li>
+<li>末行模式：保存或退出文档，以及设置编辑环境，增加行号显示灯操作</li>
+</ul>
+<p>以下是三种模式状态的状态切换图</p>
+<img src="/2019/08/22/Vim快速上手/pic1.jpg">
 
+<h2 id="命令模式"><a href="#命令模式" class="headerlink" title="命令模式"></a>命令模式</h2><p>Vim在进入时自动进入命令模式，命令模式主要是对文本的一些编辑操作，其中内置的命令也有几百上前种用法，下面是一些常用命令，通常该模式用来复制粘贴文本内容</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>dd</td>
+<td>删除（剪切）光标所在整行</td>
+</tr>
+<tr>
+<td>5dd</td>
+<td>删除（剪切）从光标处开始的5行</td>
+</tr>
+<tr>
+<td>yy</td>
+<td>复制光标所在行</td>
+</tr>
+<tr>
+<td>5yy</td>
+<td>复制光标所在处开始的5行</td>
+</tr>
+<tr>
+<td>v</td>
+<td>开始选择范围（选择后按y或d操作）</td>
+</tr>
+<tr>
+<td>V</td>
+<td>开始选择行范围</td>
+</tr>
+<tr>
+<td>n</td>
+<td>显示搜索命令定位到的下一个字符串</td>
+</tr>
+<tr>
+<td>N</td>
+<td>显示搜索命令定位到的上一个字符串</td>
+</tr>
+<tr>
+<td>u</td>
+<td>撤销上一步操作</td>
+</tr>
+<tr>
+<td>p</td>
+<td>将剪切的内容粘贴到光标位置</td>
+</tr>
+<tr>
+<td>h</td>
+<td>左移光标</td>
+</tr>
+<tr>
+<td>j</td>
+<td>下移光标</td>
+</tr>
+<tr>
+<td>k</td>
+<td>上移光标</td>
+</tr>
+<tr>
+<td>l</td>
+<td>右移光标</td>
+</tr>
+</tbody></table>
+<p>多行缩进：<br>按v选择要缩进的行，然后按‘&gt;’来缩进‘&lt;’来取消缩进</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/08/22/Vim快速上手/" data-id="cjzm4yjev000jqwu1t5e6vbf2" class="article-share-link">分享</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Bash/">Bash</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/06/20/UGUI实现窗口切换动画/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">UGUI实现窗口切换动画</div>
+    </a>
+  
+</nav>
+
+  
+</article>
 
 </section>
         

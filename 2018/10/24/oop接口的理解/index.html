@@ -5,20 +5,20 @@
   
 
   
-  <title>Unity查找对象的几种方法 | Rkg&#39;s blog</title>
+  <title>OOP接口的理解 | Rkg&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法 首先要了解两个类  GameObject TransformGameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化  12Transform t = gameobject.transform;GameObject go = t.gameobject;  而它们的区别在于">
-<meta name="keywords" content="Unity3D">
+  <meta name="description" content="概括最终目标：以不变应万变。类与类之间用接口引用，而不是直接调用，接口派生类再怎么变化只要接口不改程序就不会出现问题。把多个类似的类的相同/主要操作提取出一个接口并实现，然后这些类抽取出相同因素构成父类，令接口使用泛型限制为父类的类型，既满足了多各类的相同方法实现，也满足相同方法中的不同类型的参数。 主要逻辑原则，基本业务可以抽象成任务接口，业务类继承它，在控制器层调用任务并实例化相应的业务类，可">
+<meta name="keywords" content="OOP">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Unity查找对象的几种方法">
-<meta property="og:url" content="http://yoursite.com/2018/11/08/Unity查找对象的几种方法/index.html">
+<meta property="og:title" content="OOP接口的理解">
+<meta property="og:url" content="http://yoursite.com/2018/10/24/oop接口的理解/index.html">
 <meta property="og:site_name" content="Rkg&#39;s blog">
-<meta property="og:description" content="前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法 首先要了解两个类  GameObject TransformGameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化  12Transform t = gameobject.transform;GameObject go = t.gameobject;  而它们的区别在于">
+<meta property="og:description" content="概括最终目标：以不变应万变。类与类之间用接口引用，而不是直接调用，接口派生类再怎么变化只要接口不改程序就不会出现问题。把多个类似的类的相同/主要操作提取出一个接口并实现，然后这些类抽取出相同因素构成父类，令接口使用泛型限制为父类的类型，既满足了多各类的相同方法实现，也满足相同方法中的不同类型的参数。 主要逻辑原则，基本业务可以抽象成任务接口，业务类继承它，在控制器层调用任务并实例化相应的业务类，可">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-22T02:51:35.680Z">
+<meta property="og:updated_time" content="2019-08-22T03:30:02.743Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Unity查找对象的几种方法">
-<meta name="twitter:description" content="前言在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法 首先要了解两个类  GameObject TransformGameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化  12Transform t = gameobject.transform;GameObject go = t.gameobject;  而它们的区别在于">
+<meta name="twitter:title" content="OOP接口的理解">
+<meta name="twitter:description" content="概括最终目标：以不变应万变。类与类之间用接口引用，而不是直接调用，接口派生类再怎么变化只要接口不改程序就不会出现问题。把多个类似的类的相同/主要操作提取出一个接口并实现，然后这些类抽取出相同因素构成父类，令接口使用泛型限制为父类的类型，既满足了多各类的相同方法实现，也满足相同方法中的不同类型的参数。 主要逻辑原则，基本业务可以抽象成任务接口，业务类继承它，在控制器层调用任务并实例化相应的业务类，可">
   
     <link rel="alternate" href="/atom.xml" title="Rkg&#39;s blog" type="application/atom+xml">
   
@@ -66,14 +66,14 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-Unity查找对象的几种方法" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-oop接口的理解" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/11/08/Unity查找对象的几种方法/" class="article-date">
-  <time datetime="2018-11-08T10:32:23.000Z" itemprop="datePublished">2018-11-08</time>
+    <a href="/2018/10/24/oop接口的理解/" class="article-date">
+  <time datetime="2018-10-24T03:26:25.000Z" itemprop="datePublished">2018-10-24</time>
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/">Unity3D</a>
+    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Coding/">Coding</a>
   </div>
 
   </div>
@@ -84,7 +84,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Unity查找对象的几种方法
+      OOP接口的理解
     </h1>
   
 
@@ -92,34 +92,22 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法</p>
-<p>首先要了解两个类</p>
-<ul>
-<li><code>GameObject</code></li>
-<li><code>Transform</code><br>GameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化</li>
-</ul>
-<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Transform t = gameobject.transform;</span><br><span class="line">GameObject go = t.gameobject;</span><br></pre></td></tr></table></figure>
-
-<p>而它们的区别在于：<code>GameObject</code>更倾向于游戏体本身的属性，如物体激活状态，物体的名称，物体的标签，物体的渲染层等设置，而<code>Transform</code>更多是表述模型的<strong>层级关系</strong>也就是父子关系，和本身的位置旋转缩放等信息，所以当需要查找嵌套的物体时，优先使用<code>Transform</code>来查找模型，<code>GameObject</code>更适合在不关心物体层级关系的情况下查找,且通常是使用GameObject的静态方法查找，Transform则更多调用实例方法。</p>
-<h4 id="通过GameObject获取"><a href="#通过GameObject获取" class="headerlink" title="通过GameObject获取"></a>通过GameObject获取</h4><ol>
-<li>已经知道物体的名称，并且它是唯一的<br><code>GameObject.Find(&quot;对象名&quot;)</code></li>
-<li>已经知道物体的标签，并且是唯一的<br><code>GameObject.FindWithTag(&quot;标签名&quot;)</code></li>
-<li>已经知道物体的标签，且有多个，返回一个GameObject数组<br><code>GameObject.FindGameObjectsWithTag(&quot;标签名&quot;)</code></li>
-</ol>
-<p><em>以上方法只能查找激活状态的物体</em></p>
-<h4 id="通过Transform获取"><a href="#通过Transform获取" class="headerlink" title="通过Transform获取"></a>通过Transform获取</h4><ol>
-<li>需要获取当前物体下的某个子物体（脚本挂载当前物体上）<br><code>transform.Find(&quot;直接子物体的名称 or 子物体路径&quot;)</code><br>如果需要查找的物体就在当前物体下，可以直接使用物体名称，如果需要查找物体在更深的位置（当前是a物体，其下有b物体，b下有c物体），需要通过路径：”b\c”来找到c物体。</li>
-<li>查找所有包含组件Button的物体<br><code>Transform.FindObjectsOfType&lt;Button&gt;()</code></li>
-</ol>
-<p><em>Transform查找物体的好处是，它能找到被禁用（未激活）的物体</em></p>
+        <h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>最终目标：以不变应万变。<br>类与类之间用接口引用，而不是直接调用，接口派生类再怎么变化只要接口不改程序就不会出现问题。<br>把多个类似的类的相同/主要操作提取出一个接口并实现，然后这些类抽取出相同因素构成父类，令接口使用泛型限制为父类的类型，既满足了多各类的相同方法实现，也满足相同方法中的不同类型的参数。</p>
+<p>主要逻辑原则，基本业务可以抽象成任务接口，业务类继承它，在控制器层调用任务并实例化相应的业务类，可以直接简单的操作，即使以后业务内容变动，控制器层仍然不需要修改。</p>
+<p>不同的层展示不同的方法，通过接口就可以区分层次，高层的类（控制器）无需知道低层类（业务）的其他方法，只要使用业务.执行()的方法，同样业务类也无需知道sql查询过程，只管提交数据给dao对象查询结果，如果通用dao接口能满足使用，就无需再向下转型。<br>控制器 -（任务接口）- 业务 -（dao接口）- 数据访问实现类</p>
+<p><strong>接口</strong>是完全公开，公有的，目的就是让所有人都可以使用，但使用的人并不需要关心它内部是如何实现的，只需要使用接口固定的几个关键方法，只需知道怎么使用，不关心原理，这就是接口的意义。</p>
+<p><strong>例如</strong>一个USB接口，带有USB接口的设备成千上万，但都通过这一个接口连接电脑，对于电脑（调用方）来说，并不关心这个设备（被调用方）是怎么实现它的功能的，我只关心怎么和它通信，这就要通过接口来实现，如USB接口中定义了两个方法，send(),get() send方法用来向USB设备发送数据，而get方法用来接收数据，比如这是个u盘设备并实现了USB接口，那么电脑只需要调用uDisk.send(File)方法传入某文件/数据，这样就可以把文件写入u盘中，而电脑根本不用知道u盘内部是如何存储文件，如何管理文件的，又比如这个USB设备是一个鼠标，我们马上会想到使用Info i = mouse.get()通过get获取鼠标发回来的信息，并进行解析，看到这里，不难发现，不管是何种USB设备，它和电脑之间永远只有两种方法，就是发送和接收，这就是将两个对象间的调用关系简化到极致的产物，它已经不能再简单了，我们只要把这些关键方法写作一个接口，而它们之间交互的数据类型则成为USB接口的泛型，发送和接收方法的参数/返回值类型就可以是泛型的，这样就能使得他们之间的联系变得有条不紊。</p>
+<blockquote>
+<p>这些设备知道自己该做什么，但都遵循这个USB接口规则*</p>
+</blockquote>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/11/08/Unity查找对象的几种方法/" data-id="cjzm3k9qz0008dcu15vs78im4" class="article-share-link">分享</a>
+      <a data-url="http://yoursite.com/2018/10/24/oop接口的理解/" data-id="cjzm4jjpa0004qwu1dg2d5r7v" class="article-share-link">分享</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OOP/">OOP</a></li></ul>
 
     </footer>
   </div>
@@ -127,19 +115,19 @@
     
 <nav id="article-nav">
   
-    <a href="/2018/11/22/UI自适应分辨率/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2018/11/08/Unity中的单例基类/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
-          UI自适应分辨率
+          Unity中的单例基类
         
       </div>
     </a>
   
   
-    <a href="/2018/11/08/Unity中的单例基类/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2018/01/01/MarkDown教程/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Unity中的单例基类</div>
+      <div class="article-nav-title">MarkDown教程</div>
     </a>
   
 </nav>
