@@ -63,10 +63,338 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-UGUI实现窗口切换动画" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/06/20/UGUI实现窗口切换动画/" class="article-date">
+  <time datetime="2019-06-20T07:37:38.000Z" itemprop="datePublished">2019-06-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/">Unity3D</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/UGUI/">UGUI</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/06/20/UGUI实现窗口切换动画/">UGUI实现窗口切换动画</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在开发的过程中我们常常需要创建很多UI窗口，如何让这些窗口按照递归的方式而且还是带动画地进行切换呢，本文介绍了一种方法实现这个功能</p>
+<img src="/2019/06/20/UGUI实现窗口切换动画/effect.gif" title="effect">
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>为了实现这样的效果，需要搭建一个UI框架，原理就是让Animator组件控制红框UI容器移动</p>
+<img src="/2019/06/20/UGUI实现窗口切换动画/frame.jpg">
+
+<p>在红框容器中再放置两个空物体作为子容器，分别是A和B，A是当前的页面，B是要打开的窗口，而B子容器部分还可再嵌套一个容器，这样移动红框容器，就可以将B部分显示出来</p>
+<img src="/2019/06/20/UGUI实现窗口切换动画/frame2.jpg">
+
+<p>这时如果B部分也是一个容器，那么再移动B部分就能将C显示出来，以此类推</p>
+<h2 id="功能实现"><a href="#功能实现" class="headerlink" title="功能实现"></a>功能实现</h2><p>首先要实现的就是创建控制父容器的两个动画，移动和恢复，向左移动以显示出B子容器，向右恢复来显示A子容器，使用<code>Ctrl</code>+<code>6</code> 打开动画设置面板，选中红框容器，为其创建一个动画，创建动画的过程在这里就不赘述了，只是简单的移动Anchored Position位置，然后在Animator中为其添加展开和关闭动画，并设置is_Open bool用于值切换动画，一切准备好后，就可以为红框父容器添加一个脚本:<code>Container</code> 代码如下</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 红框容器脚本</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">Container</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    Animator at;</span><br><span class="line">    <span class="keyword">public</span> Container before; <span class="comment">//上一个容器</span></span><br><span class="line">    <span class="keyword">public</span> Button btn_back; <span class="comment">//返回上一个容器按钮（关闭当前窗口）</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Transform A; <span class="comment">//子容器A</span></span><br><span class="line">    <span class="keyword">public</span> Transform B; <span class="comment">//子容器B</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">Awake</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        at = GetComponent&lt;Animator&gt;(); <span class="comment">// 获取动画组件</span></span><br><span class="line">        A = transform.Find(<span class="string">"A"</span>);  <span class="comment">//获取子容器</span></span><br><span class="line">        B = transform.Find(<span class="string">"B"</span>);</span><br><span class="line">        <span class="keyword">if</span>(btn_back!=<span class="literal">null</span>)</span><br><span class="line">            btn_back.onClick.AddListener(Back);<span class="comment">//按钮绑定事件</span></span><br><span class="line">    &#125; </span><br><span class="line">    <span class="comment">//设置当前是否播放动画，参数为true时，切换到B，false时切换回A</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">SwitchWindow</span>(<span class="params"><span class="keyword">bool</span> b</span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        at.SetBool(<span class="string">"isOpen"</span>, b);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//按下返回按钮</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Back</span>(<span class="params"></span>) </span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        before.SwitchWindow(<span class="literal">false</span>); <span class="comment">//关闭当前窗口时，让父容器切换回A页面</span></span><br><span class="line">        <span class="comment">//返回到上一个窗口时，将自身从父容器的B子容器中分离，因为父窗口不一定只会打开这个窗口，可能会有多个分支</span></span><br><span class="line">        transform.parent= <span class="literal">null</span>;  </span><br><span class="line">        gameObject.SetActive(<span class="literal">false</span>); <span class="comment">//隐藏当前窗口</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样，只需要调用<code>SwitchWindow(bool b)</code>方法，就能实现切换窗口，接下来要创建打开一个新窗口的脚本</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">OpenWindow</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    Container Con; <span class="comment">//当前容器</span></span><br><span class="line">    <span class="keyword">public</span> Transform win; <span class="comment">//下一个窗口</span></span><br><span class="line">    <span class="keyword">public</span> Button btn; <span class="comment">//打开按钮</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">Awake</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        Con = GetComponent&lt;Container&gt;(); <span class="comment">//获取当前容器组件</span></span><br><span class="line">        btn.onClick.AddListener(() =&gt;</span><br><span class="line">        &#123;</span><br><span class="line">            win.parent = Con.B; <span class="comment">//要显示的窗口设置为容器的B</span></span><br><span class="line">            (win <span class="keyword">as</span> RectTransform).anchoredPosition = Vector3.zero;<span class="comment">//恢复0位置，相当于B容器</span></span><br><span class="line">            win.gameObject.SetActive(<span class="literal">true</span>); <span class="comment">//激活显示要切换的窗口</span></span><br><span class="line">            win.GetComponent&lt;Container&gt;().before = Con; <span class="comment">// 将当前容器传递给下一个容器</span></span><br><span class="line">            Con.SwitchWindow(<span class="literal">true</span>); <span class="comment">//切换到B</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将这个脚本赋予给红框容器，然后添加打开下一个页面的按钮和下一个窗口的Transform，默认情况下要打开窗口的GameObject是禁用隐藏的，然后先将它放入当前容器的B子容器中（预备打开），将其位置归零，然后激活这个GameObj，把当前窗口的Container组件传递给新窗口（用于在新窗口关闭时调用），一切都准备就绪后，使用<code>SwitchWindow(true)</code>让当前红框容器动画切换到B子容器，这时控制权为B容器中的内容，是调用<code>Back()</code>方法返回上一个页面，还是再进入新的页面都可以。</p>
+<p>结构图</p>
+<img src="/2019/06/20/UGUI实现窗口切换动画/frame3.jpg">
+
+<p>最后<code>Ctrl</code>+<code>D</code>复制几个容器，主容器上添加OpenWindow脚本，把复制出来的容器拖入即可</p>
+<img src="/2019/06/20/UGUI实现窗口切换动画/pic1.jpg">
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>实现这个技术主要用到了嵌套的模式结合动画来实现这个效果，有点类似于数据结构中的链栈结构，可以不断的打开新的窗口，但回退时必须要原路返回</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/" data-id="cjzmft5iw000an0u1tzof2j65" class="article-share-link">分享</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Animation/">Animation</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/UGUI/">UGUI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Git快速上手" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/05/20/Git快速上手/" class="article-date">
+  <time datetime="2019-05-20T06:11:27.000Z" itemprop="datePublished">2019-05-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Git/">Git</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/05/20/Git快速上手/">Git快速上手</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="什么是Git"><a href="#什么是Git" class="headerlink" title="什么是Git"></a>什么是Git</h2><img src="/2019/05/20/Git快速上手/pic1.png">
+<p>git是一个版本控制软件，它通过创建一个本地仓库（通俗点讲就是一个特殊文件夹），你可以将项目文件放置在包含仓库的文件夹中，当新增了项目代码或者修改后，你可以提交到仓库来保存一个版本，每当项目新增内容或者修改时，可以再次提交，这时git会帮助你保留两个版本之间的差异，在多人协作项目时可以很好的管理。</p>
+<h2 id="安装Git"><a href="#安装Git" class="headerlink" title="安装Git"></a>安装Git</h2><p>访问官网 <a href="https://git-scm.com/" target="_blank" rel="noopener">https://git-scm.com/</a> 下载并安装<br>使用默认安装完成后，在文件夹中右键，会出现一下两个新选项</p>
+<ul>
+<li>Git GUI Here</li>
+<li>Git Bash Here<br>你也可以在bash/cmd中使用<code>git --version</code>命令来查看当前安装版本</li>
+</ul>
+<h2 id="入门"><a href="#入门" class="headerlink" title="入门"></a>入门</h2><h4 id="结构图"><a href="#结构图" class="headerlink" title="结构图"></a>结构图</h4><img src="/2019/05/20/Git快速上手/pic1.jpg">
+
+<p>工作区就是日常的项目所在文件夹，而使用git的区别就是，它会在这个文件夹中创建一个.git的隐藏文件夹，这就是本地仓库。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/05/20/Git快速上手/" data-id="cjzmft5ig0000n0u1datlzl7q" class="article-share-link">分享</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Bash/">Bash</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Git/">Git</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-UI自适应分辨率" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/11/22/UI自适应分辨率/" class="article-date">
+  <time datetime="2018-11-22T03:20:32.000Z" itemprop="datePublished">2018-11-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/">Unity3D</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/22/UI自适应分辨率/">UI自适应分辨率</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>有时候我们排版好UI布局后，虽然相对位置可以随分辨率改变而改变，但图像的尺寸则是固定的，分辨率低时图形几乎占满画面，无法使用，那么就需要设置UI图形自适应缩放了</p>
+<h2 id="设置方法"><a href="#设置方法" class="headerlink" title="设置方法"></a>设置方法</h2><img src="/2018/11/22/UI自适应分辨率/pic1.png">
+<p>修改Canvas对象的Canvas Scaler组件属性：UI Scale Mode改为<br><strong>Scale With Screen Size</strong><br>并设置参考分辨率<br>这个Reference Resolution的意思是在这个分辨率下，UI元素显示的比例/尺寸是你想要的效果，或者你就是按照这个分辨率/比例调节的界面元素尺寸，Unity根据这个标准的分辨率来推算不同分辨率下UI元素的缩放程度，而程度是由Match属性决定的，值越小，调节的幅度越大。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/11/22/UI自适应分辨率/" data-id="cjzmft5iy000cn0u1ru1r6pqi" class="article-share-link">分享</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Unity查找对象的几种方法" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/11/08/Unity查找对象的几种方法/" class="article-date">
+  <time datetime="2018-11-08T10:32:23.000Z" itemprop="datePublished">2018-11-08</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/">Unity3D</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/08/Unity查找对象的几种方法/">Unity查找对象的几种方法</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法</p>
+<p>首先要了解两个类</p>
+<ul>
+<li><code>GameObject</code></li>
+<li><code>Transform</code><br>GameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化</li>
+</ul>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Transform t = gameobject.transform;</span><br><span class="line">GameObject go = t.gameobject;</span><br></pre></td></tr></table></figure>
+
+<p>而它们的区别在于：<code>GameObject</code>更倾向于游戏体本身的属性，如物体激活状态，物体的名称，物体的标签，物体的渲染层等设置，而<code>Transform</code>更多是表述模型的<strong>层级关系</strong>也就是父子关系，和本身的位置旋转缩放等信息，所以当需要查找嵌套的物体时，优先使用<code>Transform</code>来查找模型，<code>GameObject</code>更适合在不关心物体层级关系的情况下查找,且通常是使用GameObject的静态方法查找，Transform则更多调用实例方法。</p>
+<h4 id="通过GameObject获取"><a href="#通过GameObject获取" class="headerlink" title="通过GameObject获取"></a>通过GameObject获取</h4><ol>
+<li>已经知道物体的名称，并且它是唯一的<br><code>GameObject.Find(&quot;对象名&quot;)</code></li>
+<li>已经知道物体的标签，并且是唯一的<br><code>GameObject.FindWithTag(&quot;标签名&quot;)</code></li>
+<li>已经知道物体的标签，且有多个，返回一个GameObject数组<br><code>GameObject.FindGameObjectsWithTag(&quot;标签名&quot;)</code></li>
+</ol>
+<p><em>以上方法只能查找激活状态的物体</em></p>
+<h4 id="通过Transform获取"><a href="#通过Transform获取" class="headerlink" title="通过Transform获取"></a>通过Transform获取</h4><ol>
+<li>需要获取当前物体下的某个子物体（脚本挂载当前物体上）<br><code>transform.Find(&quot;直接子物体的名称 or 子物体路径&quot;)</code><br>如果需要查找的物体就在当前物体下，可以直接使用物体名称，如果需要查找物体在更深的位置（当前是a物体，其下有b物体，b下有c物体），需要通过路径：”b\c”来找到c物体。</li>
+<li>查找所有包含组件Button的物体<br><code>Transform.FindObjectsOfType&lt;Button&gt;()</code></li>
+</ol>
+<p><em>Transform查找物体的好处是，它能找到被禁用（未激活）的物体</em></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/11/08/Unity查找对象的几种方法/" data-id="cjzmft5k3001gn0u1ybls3oyn" class="article-share-link">分享</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Unity中的单例基类" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/11/08/Unity中的单例基类/" class="article-date">
+  <time datetime="2018-11-08T02:57:39.000Z" itemprop="datePublished">2018-11-08</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/">Unity3D</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/08/Unity中的单例基类/">Unity中的单例基类</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在开发过程中，由于游戏项目功能模块繁多，很多独立的模块都有自己单独的唯一入口，基本上都是用单例实现的，就像</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">UIManager</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> UIManager _instance;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> UIManager Instance</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">get</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (_instance == <span class="literal">null</span>)</span><br><span class="line">            _instance = <span class="keyword">new</span> GameObject(<span class="keyword">typeof</span>(UIManager).Name).AddComponent&lt;UIManager&gt;();</span><br><span class="line">            <span class="keyword">return</span> _instance;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的UIManager就是一个单例类，当第一次访问UIManager.Instance的时候，我们就会在游戏内创建一个名叫“UIManager”的物体，它挂载了我们的单例脚本实例UIManager。<br>现在有一个问题，假如我有100个单例类要创建，每个类都要复制这段代码很麻烦很不精炼，有没有更清爽的做法?<br>当然有，我们把单例的实现封装到基类中去就能省去代码复制之苦，可是基类并不知道子类的具体类型，怎么返回子类型的Instance？如果Instance是以基类类型返回的，那么这个基类的存在意义就不大了。但是幸好C#有泛型，我们可以把子类的具体类型以泛型参数T的形式通知给基类，这样基类就能返回子类型。下面是代码：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton&lt;T&gt; : MonoBehaviour where T : Singleton&lt;T&gt;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> T _instance;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T Instance</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">get</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (_instance == <span class="literal">null</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                _instance = <span class="keyword">new</span> GameObject(<span class="keyword">typeof</span>(T).Name).AddComponent&lt;T&gt;();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> _instance;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个基类最重要的代码就是where T : Singleton<t>，它限定T必须是Singleton<t>的子类，虽然它长的着实有点奇怪。<br>这时我们再声明单例类UIManager的时候就可以一行代码搞定了：</t></t></p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public class UIManager : Singleton&lt;UIManager&gt;</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里子类把自己的类型作为泛型参数通知给了基类，基类便知道Instance应该是什么类型了。使用的时候直接访问UIManager.Instance即可。<br>这个Singleton我觉得有点复杂，同时创建了一个私有静态变量_instance和公有静态属性Instance，显得有点冗余，这里我们做个优化：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton&lt;T&gt; : MonoBehaviour where T : Singleton&lt;T&gt;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">readonly</span> T Instance = <span class="keyword">new</span> GameObject(<span class="keyword">typeof</span>(T).Name).AddComponent&lt;T&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/11/08/Unity中的单例基类/" data-id="cjzmft5jj0016n0u1toavtv5p" class="article-share-link">分享</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-oop接口的理解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/10/24/oop接口的理解/" class="article-date">
+  <time datetime="2018-10-24T03:26:25.000Z" itemprop="datePublished">2018-10-24</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Coding/">Coding</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/10/24/oop接口的理解/">OOP接口的理解</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>最终目标：以不变应万变。<br>类与类之间用接口引用，而不是直接调用，接口派生类再怎么变化只要接口不改程序就不会出现问题。<br>把多个类似的类的相同/主要操作提取出一个接口并实现，然后这些类抽取出相同因素构成父类，令接口使用泛型限制为父类的类型，既满足了多各类的相同方法实现，也满足相同方法中的不同类型的参数。</p>
+<p>主要逻辑原则，基本业务可以抽象成任务接口，业务类继承它，在控制器层调用任务并实例化相应的业务类，可以直接简单的操作，即使以后业务内容变动，控制器层仍然不需要修改。</p>
+<p>不同的层展示不同的方法，通过接口就可以区分层次，高层的类（控制器）无需知道低层类（业务）的其他方法，只要使用业务.执行()的方法，同样业务类也无需知道sql查询过程，只管提交数据给dao对象查询结果，如果通用dao接口能满足使用，就无需再向下转型。<br>控制器 -（任务接口）- 业务 -（dao接口）- 数据访问实现类</p>
+<p><strong>接口</strong>是完全公开，公有的，目的就是让所有人都可以使用，但使用的人并不需要关心它内部是如何实现的，只需要使用接口固定的几个关键方法，只需知道怎么使用，不关心原理，这就是接口的意义。</p>
+<p><strong>例如</strong>一个USB接口，带有USB接口的设备成千上万，但都通过这一个接口连接电脑，对于电脑（调用方）来说，并不关心这个设备（被调用方）是怎么实现它的功能的，我只关心怎么和它通信，这就要通过接口来实现，如USB接口中定义了两个方法，send(),get() send方法用来向USB设备发送数据，而get方法用来接收数据，比如这是个u盘设备并实现了USB接口，那么电脑只需要调用uDisk.send(File)方法传入某文件/数据，这样就可以把文件写入u盘中，而电脑根本不用知道u盘内部是如何存储文件，如何管理文件的，又比如这个USB设备是一个鼠标，我们马上会想到使用Info i = mouse.get()通过get获取鼠标发回来的信息，并进行解析，看到这里，不难发现，不管是何种USB设备，它和电脑之间永远只有两种方法，就是发送和接收，这就是将两个对象间的调用关系简化到极致的产物，它已经不能再简单了，我们只要把这些关键方法写作一个接口，而它们之间交互的数据类型则成为USB接口的泛型，发送和接收方法的参数/返回值类型就可以是泛型的，这样就能使得他们之间的联系变得有条不紊。</p>
+<blockquote>
+<p>这些设备知道自己该做什么，但都遵循这个USB接口规则*</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/10/24/oop接口的理解/" data-id="cjzmft5js001an0u1ucpli8ny" class="article-share-link">分享</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OOP/">OOP</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Vim快速上手" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2019/08/22/Vim快速上手/" class="article-date">
-  <time datetime="2019-08-22T03:38:05.000Z" itemprop="datePublished">2019-08-22</time>
+    <a href="/2018/10/10/Vim快速上手/" class="article-date">
+  <time datetime="2018-10-10T03:38:05.000Z" itemprop="datePublished">2018-10-10</time>
 </a>
     
   <div class="article-category">
@@ -81,7 +409,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/22/Vim快速上手/">Vim快速上手</a>
+      <a class="article-title" href="/2018/10/10/Vim快速上手/">Vim快速上手</a>
     </h1>
   
 
@@ -97,9 +425,9 @@
 <li>末行模式：保存或退出文档，以及设置编辑环境，增加行号显示灯操作</li>
 </ul>
 <p>以下是三种模式状态的状态切换图</p>
-<img src="/2019/08/22/Vim快速上手/pic1.jpg">
+<img src="/2018/10/10/Vim快速上手/pic1.jpg">
 
-<h2 id="命令模式"><a href="#命令模式" class="headerlink" title="命令模式"></a>命令模式</h2><p>Vim在进入时自动进入命令模式，命令模式主要是对文本的一些编辑操作，其中内置的命令也有几百上前种用法，下面是一些常用命令，通常该模式用来复制粘贴文本内容</p>
+<h2 id="gt-命令模式"><a href="#gt-命令模式" class="headerlink" title="&gt;命令模式"></a>&gt;命令模式</h2><p>Vim在进入时自动进入命令模式，命令模式主要是对文本的一些编辑操作，其中内置的命令也有几百上前种用法，下面是一些常用命令，通常该模式用来复制粘贴文本内容</p>
 <table>
 <thead>
 <tr>
@@ -164,291 +492,83 @@
 <td>右移光标</td>
 </tr>
 </tbody></table>
-<p>多行缩进：<br>按v选择要缩进的行，然后按‘&gt;’来缩进‘&lt;’来取消缩进</p>
+<pre><code>多行缩进：
+按v选择要缩进的行，然后按‘&gt;’来缩进‘&lt;’来取消缩进</code></pre><h2 id="gt-末行模式"><a href="#gt-末行模式" class="headerlink" title="&gt;末行模式"></a>&gt;末行模式</h2><p>末行模式主要用于保存或退出文件，和对vim进行一些配置，还可以让用户执行外部的Linux命令跳转到所编写文档的特定行数。要想切换到末行模式，只需要在命令模式下敲一个‘：’就可以进入</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>:w</td>
+<td>保存文件</td>
+</tr>
+<tr>
+<td>:q</td>
+<td>退出编辑器</td>
+</tr>
+<tr>
+<td>:wq/ZZ/:x</td>
+<td>保存并退出</td>
+</tr>
+<tr>
+<td>:q!</td>
+<td>强制退出（放弃对文档的修改内容）</td>
+</tr>
+<tr>
+<td>:wq!</td>
+<td>强制保存退出</td>
+</tr>
+<tr>
+<td>:set nu</td>
+<td>显示行号</td>
+</tr>
+<tr>
+<td>:set nonu</td>
+<td>关闭行号</td>
+</tr>
+<tr>
+<td>:命令</td>
+<td>执行命令</td>
+</tr>
+<tr>
+<td>:整数</td>
+<td>跳转到该行</td>
+</tr>
+<tr>
+<td>: s/a/b</td>
+<td>将当前光标所在行中的第一个a替换成b</td>
+</tr>
+<tr>
+<td>: s/a/b/g</td>
+<td>将当前光标所在行中的所有a替换成b</td>
+</tr>
+<tr>
+<td>: %s/a/b/g</td>
+<td>将全文中的所有a替换成b</td>
+</tr>
+<tr>
+<td>? 关键字</td>
+<td>在文本中搜索关键字（从下至上）</td>
+</tr>
+<tr>
+<td>/ 关键字</td>
+<td>在文本中搜索关键字（从上至下）</td>
+</tr>
+</tbody></table>
+<pre><code>Vim始终显示行号的方法：
+定位到home目录，使用命令 vi .vimrc 创建配置文件，在配置文件中写入set nu保存退出即可</code></pre><h2 id="gt-输入模式"><a href="#gt-输入模式" class="headerlink" title="&gt;输入模式"></a>&gt;输入模式</h2><p>进入输入模式的方法，是在命令模式下按 a、i、o 键，其中 a 是在当前光标位置后移一位的位置开始插入文本，i 是在当前光标位置开始插入文本，o 键是在当前光标所在行下再新起一行开始输入</p>
+<h4 id="技巧"><a href="#技巧" class="headerlink" title="技巧"></a>技巧</h4><p>连续插入字符：在命令模式下，输入数字，然后按 i 进入插入模式，输入一个字符再按ESC键就能连续插入这个字符</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/08/22/Vim快速上手/" data-id="cjzm8gq9l000at0u1g71c0az2" class="article-share-link">分享</a>
+      <a data-url="http://yoursite.com/2018/10/10/Vim快速上手/" data-id="cjzmft5j0000en0u19qwo3b4k" class="article-share-link">分享</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Bash/">Bash</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-UGUI实现窗口切换动画" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/06/20/UGUI实现窗口切换动画/" class="article-date">
-  <time datetime="2019-06-20T07:37:38.000Z" itemprop="datePublished">2019-06-20</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/">Unity3D</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/UGUI/">UGUI</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/06/20/UGUI实现窗口切换动画/">UGUI实现窗口切换动画</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在开发的过程中我们常常需要创建很多UI窗口，如何让这些窗口按照递归的方式而且还是带动画地进行切换呢，本文介绍了一种方法实现这个功能</p>
-<img src="/2019/06/20/UGUI实现窗口切换动画/effect.gif" title="effect">
-<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>为了实现这样的效果，需要搭建一个UI框架，原理就是让Animator组件控制红框UI容器移动</p>
-<img src="/2019/06/20/UGUI实现窗口切换动画/frame.jpg">
-
-<p>在红框容器中再放置两个空物体作为子容器，分别是A和B，A是当前的页面，B是要打开的窗口，而B子容器部分还可再嵌套一个容器，这样移动红框容器，就可以将B部分显示出来</p>
-<img src="/2019/06/20/UGUI实现窗口切换动画/frame2.jpg">
-
-<p>这时如果B部分也是一个容器，那么再移动B部分就能将C显示出来，以此类推</p>
-<h2 id="功能实现"><a href="#功能实现" class="headerlink" title="功能实现"></a>功能实现</h2><p>首先要实现的就是创建控制父容器的两个动画，移动和恢复，向左移动以显示出B子容器，向右恢复来显示A子容器，使用<code>Ctrl</code>+<code>6</code> 打开动画设置面板，选中红框容器，为其创建一个动画，创建动画的过程在这里就不赘述了，只是简单的移动Anchored Position位置，然后在Animator中为其添加展开和关闭动画，并设置is_Open bool用于值切换动画，一切准备好后，就可以为红框父容器添加一个脚本:<code>Container</code> 代码如下</p>
-<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 红框容器脚本</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">Container</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    Animator at;</span><br><span class="line">    <span class="keyword">public</span> Container before; <span class="comment">//上一个容器</span></span><br><span class="line">    <span class="keyword">public</span> Button btn_back; <span class="comment">//返回上一个容器按钮（关闭当前窗口）</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Transform A; <span class="comment">//子容器A</span></span><br><span class="line">    <span class="keyword">public</span> Transform B; <span class="comment">//子容器B</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">Awake</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        at = GetComponent&lt;Animator&gt;(); <span class="comment">// 获取动画组件</span></span><br><span class="line">        A = transform.Find(<span class="string">"A"</span>);  <span class="comment">//获取子容器</span></span><br><span class="line">        B = transform.Find(<span class="string">"B"</span>);</span><br><span class="line">        <span class="keyword">if</span>(btn_back!=<span class="literal">null</span>)</span><br><span class="line">            btn_back.onClick.AddListener(Back);<span class="comment">//按钮绑定事件</span></span><br><span class="line">    &#125; </span><br><span class="line">    <span class="comment">//设置当前是否播放动画，参数为true时，切换到B，false时切换回A</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">SwitchWindow</span>(<span class="params"><span class="keyword">bool</span> b</span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        at.SetBool(<span class="string">"isOpen"</span>, b);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//按下返回按钮</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Back</span>(<span class="params"></span>) </span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        before.SwitchWindow(<span class="literal">false</span>); <span class="comment">//关闭当前窗口时，让父容器切换回A页面</span></span><br><span class="line">        <span class="comment">//返回到上一个窗口时，将自身从父容器的B子容器中分离，因为父窗口不一定只会打开这个窗口，可能会有多个分支</span></span><br><span class="line">        transform.parent= <span class="literal">null</span>;  </span><br><span class="line">        gameObject.SetActive(<span class="literal">false</span>); <span class="comment">//隐藏当前窗口</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样，只需要调用<code>SwitchWindow(bool b)</code>方法，就能实现切换窗口，接下来要创建打开一个新窗口的脚本</p>
-<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">OpenWindow</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    Container Con; <span class="comment">//当前容器</span></span><br><span class="line">    <span class="keyword">public</span> Transform win; <span class="comment">//下一个窗口</span></span><br><span class="line">    <span class="keyword">public</span> Button btn; <span class="comment">//打开按钮</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">Awake</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        Con = GetComponent&lt;Container&gt;(); <span class="comment">//获取当前容器组件</span></span><br><span class="line">        btn.onClick.AddListener(() =&gt;</span><br><span class="line">        &#123;</span><br><span class="line">            win.parent = Con.B; <span class="comment">//要显示的窗口设置为容器的B</span></span><br><span class="line">            (win <span class="keyword">as</span> RectTransform).anchoredPosition = Vector3.zero;<span class="comment">//恢复0位置，相当于B容器</span></span><br><span class="line">            win.gameObject.SetActive(<span class="literal">true</span>); <span class="comment">//激活显示要切换的窗口</span></span><br><span class="line">            win.GetComponent&lt;Container&gt;().before = Con; <span class="comment">// 将当前容器传递给下一个容器</span></span><br><span class="line">            Con.SwitchWindow(<span class="literal">true</span>); <span class="comment">//切换到B</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>将这个脚本赋予给红框容器，然后添加打开下一个页面的按钮和下一个窗口的Transform，默认情况下要打开窗口的GameObject是禁用隐藏的，然后先将它放入当前容器的B子容器中（预备打开），将其位置归零，然后激活这个GameObj，把当前窗口的Container组件传递给新窗口（用于在新窗口关闭时调用），一切都准备就绪后，使用<code>SwitchWindow(true)</code>让当前红框容器动画切换到B子容器，这时控制权为B容器中的内容，是调用<code>Back()</code>方法返回上一个页面，还是再进入新的页面都可以。</p>
-<p>结构图</p>
-<img src="/2019/06/20/UGUI实现窗口切换动画/frame3.jpg">
-
-<p>最后<code>Ctrl</code>+<code>D</code>复制几个容器，主容器上添加OpenWindow脚本，把复制出来的容器拖入即可</p>
-<img src="/2019/06/20/UGUI实现窗口切换动画/pic1.jpg">
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>实现这个技术主要用到了嵌套的模式结合动画来实现这个效果，有点类似于数据结构中的链栈结构，可以不断的打开新的窗口，但回退时必须要原路返回</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/06/20/UGUI实现窗口切换动画/" data-id="cjzm8gq9b0001t0u1u231aycx" class="article-share-link">分享</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Animation/">Animation</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/UGUI/">UGUI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-UI自适应分辨率" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/11/22/UI自适应分辨率/" class="article-date">
-  <time datetime="2018-11-22T03:20:32.000Z" itemprop="datePublished">2018-11-22</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/">Unity3D</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/22/UI自适应分辨率/">UI自适应分辨率</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>有时候我们排版好UI布局后，虽然相对位置可以随分辨率改变而改变，但图像的尺寸则是固定的，分辨率低时图形几乎占满画面，无法使用，那么就需要设置UI图形自适应缩放了</p>
-<h2 id="设置方法"><a href="#设置方法" class="headerlink" title="设置方法"></a>设置方法</h2><img src="/2018/11/22/UI自适应分辨率/pic1.png">
-<p>修改Canvas对象的Canvas Scaler组件属性：UI Scale Mode改为<br><strong>Scale With Screen Size</strong><br>并设置参考分辨率<br>这个Reference Resolution的意思是在这个分辨率下，UI元素显示的比例/尺寸是你想要的效果，或者你就是按照这个分辨率/比例调节的界面元素尺寸，Unity根据这个标准的分辨率来推算不同分辨率下UI元素的缩放程度，而程度是由Match属性决定的，值越小，调节的幅度越大。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/11/22/UI自适应分辨率/" data-id="cjzm8gq9f0004t0u15rqrs305" class="article-share-link">分享</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Unity查找对象的几种方法" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/11/08/Unity查找对象的几种方法/" class="article-date">
-  <time datetime="2018-11-08T10:32:23.000Z" itemprop="datePublished">2018-11-08</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/">Unity3D</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/08/Unity查找对象的几种方法/">Unity查找对象的几种方法</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在Unity开发中经常需要获取游戏对象，获取的方法有很多种本文就列举几种常用的方法</p>
-<p>首先要了解两个类</p>
-<ul>
-<li><code>GameObject</code></li>
-<li><code>Transform</code><br>GameObject表示的是游戏对象，Transform也可以表示游戏对象，它们之间可以互相转化</li>
-</ul>
-<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Transform t = gameobject.transform;</span><br><span class="line">GameObject go = t.gameobject;</span><br></pre></td></tr></table></figure>
-
-<p>而它们的区别在于：<code>GameObject</code>更倾向于游戏体本身的属性，如物体激活状态，物体的名称，物体的标签，物体的渲染层等设置，而<code>Transform</code>更多是表述模型的<strong>层级关系</strong>也就是父子关系，和本身的位置旋转缩放等信息，所以当需要查找嵌套的物体时，优先使用<code>Transform</code>来查找模型，<code>GameObject</code>更适合在不关心物体层级关系的情况下查找,且通常是使用GameObject的静态方法查找，Transform则更多调用实例方法。</p>
-<h4 id="通过GameObject获取"><a href="#通过GameObject获取" class="headerlink" title="通过GameObject获取"></a>通过GameObject获取</h4><ol>
-<li>已经知道物体的名称，并且它是唯一的<br><code>GameObject.Find(&quot;对象名&quot;)</code></li>
-<li>已经知道物体的标签，并且是唯一的<br><code>GameObject.FindWithTag(&quot;标签名&quot;)</code></li>
-<li>已经知道物体的标签，且有多个，返回一个GameObject数组<br><code>GameObject.FindGameObjectsWithTag(&quot;标签名&quot;)</code></li>
-</ol>
-<p><em>以上方法只能查找激活状态的物体</em></p>
-<h4 id="通过Transform获取"><a href="#通过Transform获取" class="headerlink" title="通过Transform获取"></a>通过Transform获取</h4><ol>
-<li>需要获取当前物体下的某个子物体（脚本挂载当前物体上）<br><code>transform.Find(&quot;直接子物体的名称 or 子物体路径&quot;)</code><br>如果需要查找的物体就在当前物体下，可以直接使用物体名称，如果需要查找物体在更深的位置（当前是a物体，其下有b物体，b下有c物体），需要通过路径：”b\c”来找到c物体。</li>
-<li>查找所有包含组件Button的物体<br><code>Transform.FindObjectsOfType&lt;Button&gt;()</code></li>
-</ol>
-<p><em>Transform查找物体的好处是，它能找到被禁用（未激活）的物体</em></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/11/08/Unity查找对象的几种方法/" data-id="cjzm8gq9i0006t0u1wzq7p1cf" class="article-share-link">分享</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Unity中的单例基类" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/11/08/Unity中的单例基类/" class="article-date">
-  <time datetime="2018-11-08T02:57:39.000Z" itemprop="datePublished">2018-11-08</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Unity3D/">Unity3D</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/08/Unity中的单例基类/">Unity中的单例基类</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在开发过程中，由于游戏项目功能模块繁多，很多独立的模块都有自己单独的唯一入口，基本上都是用单例实现的，就像</p>
-<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">UIManager</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> UIManager _instance;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> UIManager Instance</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">get</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (_instance == <span class="literal">null</span>)</span><br><span class="line">            _instance = <span class="keyword">new</span> GameObject(<span class="keyword">typeof</span>(UIManager).Name).AddComponent&lt;UIManager&gt;();</span><br><span class="line">            <span class="keyword">return</span> _instance;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面的UIManager就是一个单例类，当第一次访问UIManager.Instance的时候，我们就会在游戏内创建一个名叫“UIManager”的物体，它挂载了我们的单例脚本实例UIManager。<br>现在有一个问题，假如我有100个单例类要创建，每个类都要复制这段代码很麻烦很不精炼，有没有更清爽的做法?<br>当然有，我们把单例的实现封装到基类中去就能省去代码复制之苦，可是基类并不知道子类的具体类型，怎么返回子类型的Instance？如果Instance是以基类类型返回的，那么这个基类的存在意义就不大了。但是幸好C#有泛型，我们可以把子类的具体类型以泛型参数T的形式通知给基类，这样基类就能返回子类型。下面是代码：</p>
-<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton&lt;T&gt; : MonoBehaviour where T : Singleton&lt;T&gt;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> T _instance;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T Instance</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">get</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (_instance == <span class="literal">null</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                _instance = <span class="keyword">new</span> GameObject(<span class="keyword">typeof</span>(T).Name).AddComponent&lt;T&gt;();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> _instance;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个基类最重要的代码就是where T : Singleton<t>，它限定T必须是Singleton<t>的子类，虽然它长的着实有点奇怪。<br>这时我们再声明单例类UIManager的时候就可以一行代码搞定了：</t></t></p>
-<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public class UIManager : Singleton&lt;UIManager&gt;</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里子类把自己的类型作为泛型参数通知给了基类，基类便知道Instance应该是什么类型了。使用的时候直接访问UIManager.Instance即可。<br>这个Singleton我觉得有点复杂，同时创建了一个私有静态变量_instance和公有静态属性Instance，显得有点冗余，这里我们做个优化：</p>
-<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton&lt;T&gt; : MonoBehaviour where T : Singleton&lt;T&gt;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">readonly</span> T Instance = <span class="keyword">new</span> GameObject(<span class="keyword">typeof</span>(T).Name).AddComponent&lt;T&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/11/08/Unity中的单例基类/" data-id="cjzm8gq9g0005t0u1xo1jx7h8" class="article-share-link">分享</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-oop接口的理解" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/10/24/oop接口的理解/" class="article-date">
-  <time datetime="2018-10-24T03:26:25.000Z" itemprop="datePublished">2018-10-24</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Tech/">Tech</a>►<a class="article-category-link" href="/categories/Tech/Coding/">Coding</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/10/24/oop接口的理解/">OOP接口的理解</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="概括"><a href="#概括" class="headerlink" title="概括"></a>概括</h2><p>最终目标：以不变应万变。<br>类与类之间用接口引用，而不是直接调用，接口派生类再怎么变化只要接口不改程序就不会出现问题。<br>把多个类似的类的相同/主要操作提取出一个接口并实现，然后这些类抽取出相同因素构成父类，令接口使用泛型限制为父类的类型，既满足了多各类的相同方法实现，也满足相同方法中的不同类型的参数。</p>
-<p>主要逻辑原则，基本业务可以抽象成任务接口，业务类继承它，在控制器层调用任务并实例化相应的业务类，可以直接简单的操作，即使以后业务内容变动，控制器层仍然不需要修改。</p>
-<p>不同的层展示不同的方法，通过接口就可以区分层次，高层的类（控制器）无需知道低层类（业务）的其他方法，只要使用业务.执行()的方法，同样业务类也无需知道sql查询过程，只管提交数据给dao对象查询结果，如果通用dao接口能满足使用，就无需再向下转型。<br>控制器 -（任务接口）- 业务 -（dao接口）- 数据访问实现类</p>
-<p><strong>接口</strong>是完全公开，公有的，目的就是让所有人都可以使用，但使用的人并不需要关心它内部是如何实现的，只需要使用接口固定的几个关键方法，只需知道怎么使用，不关心原理，这就是接口的意义。</p>
-<p><strong>例如</strong>一个USB接口，带有USB接口的设备成千上万，但都通过这一个接口连接电脑，对于电脑（调用方）来说，并不关心这个设备（被调用方）是怎么实现它的功能的，我只关心怎么和它通信，这就要通过接口来实现，如USB接口中定义了两个方法，send(),get() send方法用来向USB设备发送数据，而get方法用来接收数据，比如这是个u盘设备并实现了USB接口，那么电脑只需要调用uDisk.send(File)方法传入某文件/数据，这样就可以把文件写入u盘中，而电脑根本不用知道u盘内部是如何存储文件，如何管理文件的，又比如这个USB设备是一个鼠标，我们马上会想到使用Info i = mouse.get()通过get获取鼠标发回来的信息，并进行解析，看到这里，不难发现，不管是何种USB设备，它和电脑之间永远只有两种方法，就是发送和接收，这就是将两个对象间的调用关系简化到极致的产物，它已经不能再简单了，我们只要把这些关键方法写作一个接口，而它们之间交互的数据类型则成为USB接口的泛型，发送和接收方法的参数/返回值类型就可以是泛型的，这样就能使得他们之间的联系变得有条不紊。</p>
-<blockquote>
-<p>这些设备知道自己该做什么，但都遵循这个USB接口规则*</p>
-</blockquote>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/10/24/oop接口的理解/" data-id="cjzm8gq9m000bt0u1h0fgnu42" class="article-share-link">分享</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OOP/">OOP</a></li></ul>
 
     </footer>
   </div>
@@ -553,12 +673,12 @@
 
 <p>link1: <a href="https://www.google.com" target="_blank" rel="noopener">aa</a><br>link2: <a href="https://hhh" target="_blank" rel="noopener">1</a></p>
 <p><img src="http://static.runoob.com/images/runoob-logo.png" alt="RUNOOB 图标" title="RUNOOB123"></p>
-<p>表格<br>| A | B | C |<br>|——-|——-|——|<br>| 第一列 | 第二列 | 第三列 |</p>
+<p>表格<br>| A | B | C |<br>| — | — | — |<br>| 第一列 | 第二列 | 第三列 |</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/01/01/MarkDown教程/" data-id="cjzm8gq970000t0u16wn108hu" class="article-share-link">分享</a>
+      <a data-url="http://yoursite.com/2018/01/01/MarkDown教程/" data-id="cjzmft5iv0009n0u131o7n50l" class="article-share-link">分享</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Markdown/">Markdown</a></li></ul>
@@ -580,7 +700,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">分类</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/">Tech</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Coding/">Coding</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Linux/">Linux</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Linux/Vim/">Vim</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/MarkDown/">MarkDown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Unity3D/">Unity3D</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Unity3D/UGUI/">UGUI</a></li></ul></li></ul></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/">Tech</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Coding/">Coding</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Git/">Git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Linux/">Linux</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Linux/Vim/">Vim</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/MarkDown/">MarkDown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Unity3D/">Unity3D</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Tech/Unity3D/UGUI/">UGUI</a></li></ul></li></ul></li></ul>
     </div>
   </div>
 
@@ -590,7 +710,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Animation/">Animation</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bash/">Bash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OOP/">OOP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UGUI/">UGUI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Animation/">Animation</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bash/">Bash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OOP/">OOP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UGUI/">UGUI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Unity3D/">Unity3D</a></li></ul>
     </div>
   </div>
 
@@ -600,7 +720,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Animation/" style="font-size: 10px;">Animation</a> <a href="/tags/Bash/" style="font-size: 10px;">Bash</a> <a href="/tags/Linux/" style="font-size: 10px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/OOP/" style="font-size: 10px;">OOP</a> <a href="/tags/UGUI/" style="font-size: 10px;">UGUI</a> <a href="/tags/Unity3D/" style="font-size: 20px;">Unity3D</a>
+      <a href="/tags/Animation/" style="font-size: 10px;">Animation</a> <a href="/tags/Bash/" style="font-size: 15px;">Bash</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Linux/" style="font-size: 10px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/OOP/" style="font-size: 10px;">OOP</a> <a href="/tags/UGUI/" style="font-size: 10px;">UGUI</a> <a href="/tags/Unity3D/" style="font-size: 20px;">Unity3D</a>
     </div>
   </div>
 
@@ -609,7 +729,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a></li></ul>
     </div>
   </div>
 
@@ -622,11 +742,11 @@
       <ul>
         
           <li>
-            <a href="/2019/08/22/Vim快速上手/">Vim快速上手</a>
+            <a href="/2019/06/20/UGUI实现窗口切换动画/">UGUI实现窗口切换动画</a>
           </li>
         
           <li>
-            <a href="/2019/06/20/UGUI实现窗口切换动画/">UGUI实现窗口切换动画</a>
+            <a href="/2019/05/20/Git快速上手/">Git快速上手</a>
           </li>
         
           <li>
